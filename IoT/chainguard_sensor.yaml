@@ -1,0 +1,75 @@
+# ─────────────────────────────────────────────────────────────
+# ChainGuard — Workflow 2: Temperature & Humidity Breach
+# ─────────────────────────────────────────────────────────────
+# Trigger: Raspberry Pi POSTs sensor data when threshold is breached
+# Note: Pi only calls this endpoint WHEN a breach is detected —
+#       normal readings are discarded on the Pi side (off-chain)
+#       Only confirmed breaches hit this workflow and go on-chain
+# ─────────────────────────────────────────────────────────────
+
+name: chainguard-sensor-breach
+version: "1.0"
+description: Handles cold chain temperature and humidity breach events
+
+trigger:
+  type: webhook
+  endpoint: /chainguard-sensor
+  auth: hmac_sha256
+  secret_env: KWALA_SECRET
+
+conditions:
+  - field: payload.breach
+    operator: equals
+    value: true
+  - field: payload.temp
+    operator: not_null
+
+actions:
+
+  # Step 1 — Log breach event permanently on-chain
+  - id: log_breach
+    type: contract_call
+    contract: CustodyLedger
+    function: logBreach
+    chain: polygon_mumbai
+    params:
+      uid: "{{payload.uid}}"
+      temp: "{{payload.temp}}"
+      humidity: "{{payload.humidity}}"
+      reason: "{{payload.reason}}"
+      location: "{{payload.location}}"
+      timestamp: "{{payload.timestamp}}"
+
+  # Step 2 — Flag batch as cold-chain compromised
+  - id: flag_batch
+    type: contract_call
+    contract: ProductPassport
+    function: flagColdChainBreach
+    chain: polygon_mumbai
+    params:
+      uid: "{{payload.uid}}"
+      breachTx: "{{actions.log_breach.result.txHash}}"
+
+  # Step 3 — Alert brand quality team via webhook
+  - id: alert_brand
+    type: api_call
+    url: "{{env.BRAND_ALERT_WEBHOOK}}"
+    method: POST
+    body:
+      alert: COLD_CHAIN_BREACH
+      uid: "{{payload.uid}}"
+      temp: "{{payload.temp}}"
+      humidity: "{{payload.humidity}}"
+      reason: "{{payload.reason}}"
+      location: "{{payload.location}}"
+      timestamp: "{{payload.timestamp}}"
+      tx: "{{actions.log_breach.result.txHash}}"
+
+  # Step 4 — Return verdict to Pi
+  - id: respond
+    type: return
+    body:
+      status: BREACH
+      uid: "{{payload.uid}}"
+      tx: "{{actions.log_breach.result.txHash}}"
+      message: "Cold chain breach logged on-chain — brand notified"

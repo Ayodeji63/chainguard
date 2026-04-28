@@ -1,0 +1,38 @@
+Name: cross_chain_token_mint_workflow
+Trigger:
+  TriggerSourceContract: 0xb0C1CdeC1Be918f9E232Bc7B96186035858CccFD
+  TriggerChainID: 84532
+  TriggerEventName: TokensBurned(address,uint256,address,uint64,bytes32)
+  TriggerEventFilter: NA
+  TriggerSourceContractABI: eyJ0eXBlIjoiZXZlbnQiLCJuYW1lIjoiVG9rZW5zQnVybmVkIiwiaW5wdXRzIjpbeyJuYW1lIjoiZnJvbSIsInR5cGUiOiJhZGRyZXNzIiwiaW5kZXhlZCI6dHJ1ZSwiaW50ZXJuYWxUeXBlIjoiYWRkcmVzcyJ9LHsibmFtZSI6ImFtb3VudCIsInR5cGUiOiJ1aW50MjU2IiwiaW5kZXhlZCI6ZmFsc2UsImludGVybmFsVHlwZSI6InVpbnQyNTYifSx7Im5hbWUiOiJyZWNpcGllbnQiLCJ0eXBlIjoiYWRkcmVzcyIsImluZGV4ZWQiOnRydWUsImludGVybmFsVHlwZSI6ImFkZHJlc3MifSx7Im5hbWUiOiJkZXN0aW5hdGlvbkNoYWluSWQiLCJ0eXBlIjoidWludDY0IiwiaW5kZXhlZCI6ZmFsc2UsImludGVybmFsVHlwZSI6InVpbnQ2NCJ9LHsibmFtZSI6InRyYW5zZmVySWQiLCJ0eXBlIjoiYnl0ZXMzMiIsImluZGV4ZWQiOmZhbHNlLCJpbnRlcm5hbFR5cGUiOiJieXRlczMyIn1dLCJhbm9ueW1vdXMiOmZhbHNlfQ==
+  TriggerPrice: NA
+  RecurringSourceContract: 0xb0C1CdeC1Be918f9E232Bc7B96186035858CccFD
+  RecurringChainID: 84532
+  RecurringEventName: TokensBurned(address,uint256,address,uint64,bytes32)
+  RecurringEventFilter: NA
+  RecurringSourceContractABI: eyJ0eXBlIjoiZXZlbnQiLCJuYW1lIjoiVG9rZW5zQnVybmVkIiwiaW5wdXRzIjpbeyJuYW1lIjoiZnJvbSIsInR5cGUiOiJhZGRyZXNzIiwiaW5kZXhlZCI6dHJ1ZSwiaW50ZXJuYWxUeXBlIjoiYWRkcmVzcyJ9LHsibmFtZSI6ImFtb3VudCIsInR5cGUiOiJ1aW50MjU2IiwiaW5kZXhlZCI6ZmFsc2UsImludGVybmFsVHlwZSI6InVpbnQyNTYifSx7Im5hbWUiOiJyZWNpcGllbnQiLCJ0eXBlIjoiYWRkcmVzcyIsImluZGV4ZWQiOnRydWUsImludGVybmFsVHlwZSI6ImFkZHJlc3MifSx7Im5hbWUiOiJkZXN0aW5hdGlvbkNoYWluSWQiLCJ0eXBlIjoidWludDY0IiwiaW5kZXhlZCI6ZmFsc2UsImludGVybmFsVHlwZSI6InVpbnQ2NCJ9LHsibmFtZSI6InRyYW5zZmVySWQiLCJ0eXBlIjoiYnl0ZXMzMiIsImluZGV4ZWQiOmZhbHNlLCJpbnRlcm5hbFR5cGUiOiJieXRlczMyIn1dLCJhbm9ueW1vdXMiOmZhbHNlfQ==
+  RecurringPrice: NA
+  RepeatEvery: event
+  ExecuteAfter: event
+  ExpiresIn: 1781796603
+  Meta: NA
+  ActionStatusNotificationPOSTURL: NA
+  ActionStatusNotificationAPIKey: NA
+Actions:
+  - Name: mint_on_optimism_sepolia
+    Type: call
+    TargetContract: "0xb0C1CdeC1Be918f9E232Bc7B96186035858CccFD"
+    TargetFunction: mintCrossChain
+    SmartWallet: 0x9061e42f972c8b4ffe1848ef6d151afcdbee209e
+    TargetParams:
+      - "{{event.recipient}}" # Who receives the tokens on Base
+      - "{{event.amount}}" # How many tokens to mint
+      - "{{event.destinationChainId}}"
+      - "{{event.transferId}}" # Prevents double minting
+    ChainID: 11155420
+    encodedABI: eyJ0eXBlIjoiZnVuY3Rpb24iLCJuYW1lIjoibWludENyb3NzQ2hhaW4iLCJpbnB1dHMiOlt7Im5hbWUiOiJ0byIsInR5cGUiOiJhZGRyZXNzIiwiaW50ZXJuYWxUeXBlIjoiYWRkcmVzcyJ9LHsibmFtZSI6ImFtb3VudCIsInR5cGUiOiJ1aW50MjU2IiwiaW50ZXJuYWxUeXBlIjoidWludDI1NiJ9LHsibmFtZSI6InNvdXJjZUNoYWluSWQiLCJ0eXBlIjoidWludDY0IiwiaW50ZXJuYWxUeXBlIjoidWludDY0In0seyJuYW1lIjoidHJhbnNmZXJJZCIsInR5cGUiOiJieXRlczMyIiwiaW50ZXJuYWxUeXBlIjoiYnl0ZXMzMiJ9XSwib3V0cHV0cyI6W10sInN0YXRlTXV0YWJpbGl0eSI6Im5vbnBheWFibGUifQ==
+
+    metadata: "Mint SCT tokens on Base Sepolia after burn on Polygon"
+    retriesUntilSuccess: 3 # Higher retries — token minting is critical
+Execution:
+  Mode: sequential

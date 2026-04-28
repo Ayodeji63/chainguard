@@ -1,0 +1,107 @@
+# ─────────────────────────────────────────────────────────────
+# ChainGuard — Workflow 1: RFID Scan Handler
+# ─────────────────────────────────────────────────────────────
+# Trigger: Raspberry Pi POSTs a scan event when RFID card is read
+#
+# Logic:
+#   1. Validate the payload signature
+#   2. Check if this RFID UID has been used before (FraudRegistry)
+#   3. If first use  → log custody transfer on-chain → return AUTHENTIC
+#   4. If duplicate  → freeze product on-chain → alert brand → return FRAUD
+# ─────────────────────────────────────────────────────────────
+
+name: chainguard-scan
+version: "1.0"
+description: Handles RFID scan events from the Raspberry Pi edge gateway
+
+trigger:
+  type: webhook
+  endpoint: /chainguard-scan
+  auth: hmac_sha256
+  secret_env: KWALA_SECRET
+
+conditions:
+  - field: payload.uid
+    operator: not_null
+  - field: payload.timestamp
+    operator: not_null
+
+actions:
+
+  # Step 1 — Check if this UID has been seen before
+  - id: check_uid
+    type: contract_call
+    contract: FraudRegistry
+    function: registerUID
+    chain: polygon_mumbai
+    params:
+      uid: "{{payload.uid}}"
+      batchId: "{{payload.batch_id}}"
+
+  # Step 2 — Branch on result
+  - id: route
+    type: conditional
+    if: "{{actions.check_uid.result.isFirstUse == false}}"
+
+    # ── FRAUD BRANCH ──────────────────────────────────────
+    then:
+
+      # Freeze the product passport on-chain
+      - id: freeze_product
+        type: contract_call
+        contract: ProductPassport
+        function: freezeProduct
+        chain: polygon_mumbai
+        params:
+          uid: "{{payload.uid}}"
+          reason: "DUPLICATE_UID_DETECTED"
+          location: "{{payload.location}}"
+          timestamp: "{{payload.timestamp}}"
+
+      # Alert brand via webhook
+      - id: alert_brand
+        type: api_call
+        url: "{{env.BRAND_ALERT_WEBHOOK}}"
+        method: POST
+        body:
+          alert: FRAUD_DETECTED
+          uid: "{{payload.uid}}"
+          location: "{{payload.location}}"
+          timestamp: "{{payload.timestamp}}"
+          tx: "{{actions.freeze_product.result.txHash}}"
+
+      # Return FRAUD verdict to Raspberry Pi
+      - id: respond_fraud
+        type: return
+        body:
+          status: FRAUD
+          uid: "{{payload.uid}}"
+          tx: "{{actions.freeze_product.result.txHash}}"
+          message: "Duplicate UID — product frozen on-chain"
+
+      - type: stop
+
+    # ── AUTHENTIC BRANCH ──────────────────────────────────
+    else:
+
+      # Log custody handoff on-chain
+      - id: log_handoff
+        type: contract_call
+        contract: CustodyLedger
+        function: logHandoff
+        chain: polygon_mumbai
+        params:
+          uid: "{{payload.uid}}"
+          location: "{{payload.location}}"
+          timestamp: "{{payload.timestamp}}"
+          temp: "{{payload.temp}}"
+          humidity: "{{payload.humidity}}"
+
+      # Return AUTHENTIC verdict to Raspberry Pi
+      - id: respond_ok
+        type: return
+        body:
+          status: AUTHENTIC
+          uid: "{{payload.uid}}"
+          tx: "{{actions.log_handoff.result.txHash}}"
+          message: "Custody transfer logged on-chain"

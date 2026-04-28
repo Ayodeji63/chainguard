@@ -1,0 +1,6 @@
+2026/04/27-18:05:59.579 1f05 Reusing MANIFEST /home/dell/projects/chainguard/bot/.wwebjs_auth/session/Default/Local Storage/leveldb/MANIFEST-000001
+2026/04/27-18:05:59.580 1f05 Recovering log #3
+2026/04/27-18:05:59.581 1f05 Reusing old log /home/dell/projects/chainguard/bot/.wwebjs_auth/session/Default/Local Storage/leveldb/000003.log 
+2026/04/27-18:06:59.583 1f03 Level-0 table #5: started
+2026/04/27-18:06:59.597 1f03 Level-0 table #5: 18288 bytes OK
+2026/04/27-18:06:59.602 1f03 Delete type=0 #3

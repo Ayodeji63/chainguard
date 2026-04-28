@@ -1,0 +1,68 @@
+# ─────────────────────────────────────────────────────────────
+# ChainGuard — Workflow 3: Tamper / Tilt Detection
+# ─────────────────────────────────────────────────────────────
+# Trigger: Raspberry Pi POSTs when tilt sensor fires
+# This means a package has been physically disturbed —
+# knocked over, opened, or moved unexpectedly
+# ─────────────────────────────────────────────────────────────
+
+name: chainguard-tamper
+version: "1.0"
+description: Handles physical tamper events from the tilt sensor
+
+trigger:
+  type: webhook
+  endpoint: /chainguard-tamper
+  auth: hmac_sha256
+  secret_env: KWALA_SECRET
+
+conditions:
+  - field: payload.tilted
+    operator: equals
+    value: true
+
+actions:
+
+  # Step 1 — Log tamper event on-chain as evidence
+  - id: log_tamper
+    type: contract_call
+    contract: FraudRegistry
+    function: logTamper
+    chain: polygon_mumbai
+    params:
+      uid: "{{payload.uid}}"
+      location: "{{payload.location}}"
+      timestamp: "{{payload.timestamp}}"
+
+  # Step 2 — Mark batch as tamper-suspected (not frozen yet —
+  # requires manual inspection before full freeze)
+  - id: flag_tamper
+    type: contract_call
+    contract: ProductPassport
+    function: flagTamperSuspected
+    chain: polygon_mumbai
+    params:
+      uid: "{{payload.uid}}"
+      tamperTx: "{{actions.log_tamper.result.txHash}}"
+
+  # Step 3 — Alert logistics manager
+  - id: alert_logistics
+    type: api_call
+    url: "{{env.BRAND_ALERT_WEBHOOK}}"
+    method: POST
+    body:
+      alert: TAMPER_DETECTED
+      uid: "{{payload.uid}}"
+      location: "{{payload.location}}"
+      timestamp: "{{payload.timestamp}}"
+      tx: "{{actions.log_tamper.result.txHash}}"
+      action_required: "Manual inspection needed before batch can be accepted"
+
+  # Step 4 — Return verdict to Pi
+  - id: respond
+    type: return
+    body:
+      status: TAMPER
+      uid: "{{payload.uid}}"
+      tx: "{{actions.log_tamper.result.txHash}}"
+      message: "Tamper event logged on-chain — manual inspection required"
