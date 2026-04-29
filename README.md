@@ -1,21 +1,21 @@
 # ChainGuard
 
-> **Blockchain + IoT Supply Chain Security** — Real-time condition monitoring, smart contract escrow, and automated cross-chain dispute resolution powered by Kwala Serverless.
+> **Blockchain + IoT Supply Chain Security**  Real-time condition monitoring, smart contract escrow, and automated cross-chain dispute resolution powered by Kwala Serverless.
 
 ---
 
 ## Overview
 
-ChainGuard is a decentralized supply chain security system built for global pharmaceutical and goods logistics. It combines IoT sensor simulation with smart contracts to enforce accountability between manufacturers, carriers, and wholesalers — automatically, without human intervention.
+ChainGuard is a decentralized supply chain security system built for global oil & gas and goods logistics. It combines IoT sensor simulation with smart contracts to enforce accountability between manufacturers, carriers, and wholesalers automatically, without human intervention.
 
-When goods are damaged in transit, sensors detect the breach, Kwala triggers dispute resolution, and funds are redistributed — all on-chain, in seconds.
+When goods are damaged in transit, sensors detect the breach, Kwala triggers dispute resolution, and funds are redistributed all on-chain, in seconds.
 
 ---
 
 ## The Problem
 
 - Temperature, humidity, and tilt breaches go **undetected** during transit
-- Payments rely on **paper contracts** and trust — disputes take 60+ days
+- Payments rely on **paper contracts** and trust  disputes take 60+ days
 - Manufacturers and wholesalers in **different jurisdictions** have no shared enforcement system
 - Fraud (unauthorized RFID scans, impossible travel) has **no on-chain evidence trail**
 
@@ -102,11 +102,11 @@ Tracks item state, records sensor readings, and detects breaches and fraud.
 
 **Events emitted:**
 
-- `ItemCreated` — new item registered
-- `ItemScanned` — custody scan recorded
-- `SensorDataReported` — sensor reading logged
-- `ConditionBreached` — threshold exceeded (temp/humidity/tilt)
-- `FraudDetected` — unauthorized scan or impossible travel
+- `ItemCreated`  new item registered
+- `ItemScanned`  custody scan recorded
+- `SensorDataReported`  sensor reading logged
+- `ConditionBreached`  threshold exceeded (temp/humidity/tilt)
+- `FraudDetected`  unauthorized scan or impossible travel
 
 ---
 
@@ -318,12 +318,12 @@ OPTIMISM_RPC_URL=https://mainnet.optimism.io
 BASE_CHAIN_ID=8453
 OPTIMISM_CHAIN_ID=10
 
-# Contract addresses — Base
+# Contract addresses  Base
 SOURCE_CONTRACT_ADDRESS=0x...
 ESCROW_CONTRACT_ADDRESS=0x...
 TOKEN_A_CONTRACT_ADDRESS=0x...
 
-# Contract addresses — Optimism
+# Contract addresses  Optimism
 RECEIVER_CONTRACT_ADDRESS=0x...
 TOKEN_B_CONTRACT_ADDRESS=0x...
 
@@ -376,7 +376,7 @@ GET /api/items/token-balance/:address/:chain  # SCT balance (base or optimism)
 
 ### WebSocket Events
 
-Connect to `ws://localhost:3001` — the backend streams these events to the frontend:
+Connect to `ws://localhost:3001`  the backend streams these events to the frontend:
 
 | Event             | Trigger                                    |
 | ----------------- | ------------------------------------------ |
@@ -435,11 +435,11 @@ forge test --match-test testFraudDetectedImpossibleTravel -vvvv
 
 ## Future Plans
 
-- **Real IoT hardware** — Replace Playground with Raspberry Pi (DHT22 + MPU6050 + RC522 RFID)
-- **Multi-hop supply chains** — Distributor and retailer roles with nested escrow
-- **Cross-chain escrow funding** — Wholesaler funds escrow natively from Optimism via `burnCrossChain`
-- **ZK compliance proofs** — Privacy-preserving sensor data for regulatory submissions
-- **NAFDAC / FDA compliance layer** — On-chain regulatory reporting for pharmaceutical shipments
+- **Real IoT hardware**  Replace Playground with Raspberry Pi (DHT22 + MPU6050 + RC522 RFID)
+- **Multi-hop supply chains**  Distributor and retailer roles with nested escrow
+- **Cross-chain escrow funding**  Wholesaler funds escrow natively from Optimism via `burnCrossChain`
+- **ZK compliance proofs**  Privacy-preserving sensor data for regulatory submissions
+- **NAFDAC / FDA compliance layer**  On-chain regulatory reporting for pharmaceutical shipments
 
 ---
 
@@ -449,4 +449,4 @@ MIT
 
 ---
 
-_Built for the Kwala Hackathon — Modernizing African Finance & Energy_
+_Built for the Kwala Hackathon  Modernizing African Finance & Energy_
